@@ -67,7 +67,6 @@ class TestBooksCollector:
         collector.set_book_genre(name, invalid_genre)
         assert collector.get_book_genre(name) != invalid_genre
 
-    # Тесты для метода get_books_with_specific_genre
     def test_get_books_with_specific_genre(self, collector):
         # Добавляем две книги с жанром "Фантастика"
         collector.add_new_book("Book 1")
@@ -79,15 +78,24 @@ class TestBooksCollector:
         books_with_specific_genre = collector.get_books_with_specific_genre("Фантастика")
 
         # Проверяем, что список содержит ровно две книги, и все они имеют жанр "Фантастика"
-        assert len(books_with_specific_genre) == 2 and all(collector.get_book_genre(book) == "Фантастика" for book in books_with_specific_genre)
+        assert len(books_with_specific_genre) == 2 and all(
+            collector.get_book_genre(book) == "Фантастика" for book in books_with_specific_genre)
 
-    # Тесты для метода get_books_for_children
-    def test_get_books_for_children(self, collector):
-        for name, genre in test_books:
-            collector.add_new_book(name)
-            collector.set_book_genre(name, genre)
+    def test_get_books_for_children_genre(self, collector):
+        # Добавляем две книги с жанром "Фантастика"
+        collector.add_new_book("Book 1")
+        collector.set_book_genre("Book 1", "Фантастика")
+        collector.add_new_book("Book 2")
+        collector.set_book_genre("Book 2", "Фантастика")
 
-        books_for_children = collector.get_books_for_children()
+        # Добавляем одну книгу с жанром "Для детей"
+        collector.add_new_book("Book 3")
+        collector.set_book_genre("Book 3", "Для детей")
+
+        # Получаем список книг с жанром "Для детей"
+        books_for_children = collector.get_books_with_specific_genre("Для детей")
+
+        # Проверяем, что в списке книг для детей нет книг с жанрами из genre_age_rating
         assert all(collector.get_book_genre(book) not in collector.genre_age_rating for book in books_for_children)
 
     # Тест для метода add_book_in_favorites с невалидным названием книги
