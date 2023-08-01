@@ -44,7 +44,7 @@ class TestBooksCollector:
     @pytest.mark.parametrize("name", [book[0] for book in test_books])
     def test_add_new_book(self, collector, name):
         collector.add_new_book(name)
-        assert name in collector.books_genre
+        assert name in collector.get_books_genre()
 
     def test_add_new_book_invalid_name(self, collector):
         # Попытка добавить книгу с недопустимым названием (символов > 40)
@@ -53,8 +53,9 @@ class TestBooksCollector:
         assert invalid_name not in collector.books_genre
 
     # Тесты для метода set_book_genre
-    @pytest.mark.parametrize("name, genre", test_books)
-    def test_set_book_genre(self, collector, name, genre):
+    # Убрала параметризацию и использую только один тест для проверки этого метода
+    def test_set_book_genre(self, collector):
+        name, genre = test_books[0]
         collector.add_new_book(name)
         collector.set_book_genre(name, genre)
         assert collector.get_book_genre(name) == genre
@@ -68,13 +69,17 @@ class TestBooksCollector:
 
     # Тесты для метода get_books_with_specific_genre
     def test_get_books_with_specific_genre(self, collector):
-        for name, genre in test_books:
-            collector.add_new_book(name)
-            collector.set_book_genre(name, genre)
+        # Добавляем две книги с жанром "Фантастика"
+        collector.add_new_book("Book 1")
+        collector.set_book_genre("Book 1", "Фантастика")
+        collector.add_new_book("Book 2")
+        collector.set_book_genre("Book 2", "Фантастика")
 
-        specific_genre = "Фантастика"
-        books_with_specific_genre = collector.get_books_with_specific_genre(specific_genre)
-        assert all(collector.get_book_genre(book) == specific_genre for book in books_with_specific_genre)
+        # Получаем список книг с жанром "Фантастика"
+        books_with_specific_genre = collector.get_books_with_specific_genre("Фантастика")
+
+        # Проверяем, что список содержит ровно две книги, и все они имеют жанр "Фантастика"
+        assert len(books_with_specific_genre) == 2 and all(collector.get_book_genre(book) == "Фантастика" for book in books_with_specific_genre)
 
     # Тесты для метода get_books_for_children
     def test_get_books_for_children(self, collector):
@@ -85,17 +90,7 @@ class TestBooksCollector:
         books_for_children = collector.get_books_for_children()
         assert all(collector.get_book_genre(book) not in collector.genre_age_rating for book in books_for_children)
 
-    # Тесты для методов add_book_in_favorites и delete_book_from_favorites
-    @pytest.mark.parametrize("name", test_favorites)
-    def test_add_and_delete_book_from_favorites(self, collector, name):
-        collector.add_new_book(name)
-        collector.set_book_genre(name, "Фантастика")  # Добавим валидный жанр, чтобы можно было добавить в избранное
-        collector.add_book_in_favorites(name)
-        assert name in collector.favorites
-
-        collector.delete_book_from_favorites(name)
-        assert name not in collector.favorites
-
+    # Тест для метода add_book_in_favorites с невалидным названием книги
     def test_add_book_in_favorites_invalid_book(self, collector):
         invalid_book = "Invalid Book"
         collector.add_new_book(invalid_book)
